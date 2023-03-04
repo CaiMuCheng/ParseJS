@@ -1,12 +1,9 @@
-import { Transformer } from "../transform/transformer.js";
+import traverse from "../traverse/traverse.js";
 
 class CodeGenerator {
     constructor(ast) {
         this.ast = ast;
         this.data = [];
-        this.transformer = new Transformer(
-            this.visitorRoot()
-        );
         this.format = false;
         this.computedMode = "default";
         this.bracketForExpressionStatement = false;
@@ -31,7 +28,7 @@ class CodeGenerator {
     }
     visitorRoot() {
         let obj = {};
-        obj.enter = (path) => {
+        const enter = obj.enter = (path) => {
             let node = path.node;
             let type = node.type;
             switch (type) {
@@ -55,12 +52,12 @@ class CodeGenerator {
                     break;
                 case "VariableDeclarator":
                     path.skip();
-                    path.exec(node.id);
+                    path.traverse("id");
                     if (node.init != null) {
                         this.spaceFormat();
                         this.emit("=");
                         this.spaceFormat();
-                        path.exec(node.init);
+                        path.traverse("init");
                     }
                     break;
                 case "FunctionDeclaration":
@@ -83,9 +80,8 @@ class CodeGenerator {
                         this.emit(node.id.name);
                     }
                     this.emit("(");
-                    for (let index = 0;index < node.params.length;index++) {
-                        let value = node.params[index];
-                        path.exec(value);
+                    for (let index = 0; index < node.params.length; index++) {
+                        path.traverse("params", index);
                         if (index < node.params.length - 1) {
                             this.emit(",");
                             this.spaceFormat();
@@ -93,7 +89,7 @@ class CodeGenerator {
                     }
                     this.emit(")");
                     this.spaceFormat();
-                    path.exec(node.body);
+                    path.traverse("body");
                     if (node.type == "FunctionExpression") {
                         this.emit(")");
                     }
@@ -102,7 +98,7 @@ class CodeGenerator {
                     path.skip();
                     this.emit("return");
                     this.space();
-                    path.exec(node.argument);
+                    path.traverse("argument");
                     this.end();
                     break;
                 case "IfStatement":
@@ -110,15 +106,15 @@ class CodeGenerator {
                     this.emit("if");
                     this.spaceFormat();
                     this.emit("(");
-                    path.exec(node.test);
+                    path.traverse("test");
                     this.emit(")");
                     this.spaceFormat();
-                    path.exec(node.consequent);
+                    path.traverse("consequent");
                     if (node.alternate != null) {
                         this.spaceFormat();
                         this.emit("else");
                         this.space();
-                        path.exec(node.alternate);
+                        path.traverse("alternate");
                     }
                     this.end();
                     break;
@@ -127,21 +123,21 @@ class CodeGenerator {
                     this.emit("while");
                     this.spaceFormat();
                     this.emit("(");
-                    path.exec(node.test);
+                    path.traverse("test");
                     this.emit(")");
                     this.spaceFormat();
-                    path.exec(node.body);
+                    path.traverse("body");
                     this.end();
                     break;
                 case "DoWhileStatement":
                     path.skip();
                     this.emit("do");
                     this.spaceFormat();
-                    path.exec(node.body);
+                    path.traverse("body");
                     this.spaceFormat();
                     this.emit("while");
                     this.emit("(");
-                    path.exec(node.test);
+                    path.traverse("test");
                     this.emit(")");
                     this.end();
                     break;
@@ -150,14 +146,14 @@ class CodeGenerator {
                     this.emit("for");
                     this.spaceFormat();
                     this.emit("(");
-                    path.exec(node.init);
+                    path.traverse("init");
                     this.end();
-                    path.exec(node.test);
+                    path.traverse("test");
                     this.end();
-                    path.exec(node.update);
+                    path.traverse("update");
                     this.emit(")");
                     this.spaceFormat();
-                    path.exec(node.body);
+                    path.traverse("body");
                     this.end();
                     break;
                 case "BreakStatement":
@@ -165,7 +161,7 @@ class CodeGenerator {
                     this.emit("break");
                     if (node.label != null) {
                         this.space();
-                        path.exec(node.label);
+                        path.traverse("label");
                     }
                     this.end();
                     break;
@@ -174,7 +170,7 @@ class CodeGenerator {
                     this.emit("continue");
                     if (node.label != null) {
                         this.space();
-                        path.exec(node.label);
+                        path.traverse("label");
                     }
                     this.end();
                     break;
@@ -182,34 +178,33 @@ class CodeGenerator {
                     path.skip();
                     this.emit("try");
                     this.spaceFormat();
-                    path.exec(node.block);
+                    path.traverse("block");
                     this.spaceFormat();
-                    path.exec(node.handler);
+                    path.traverse("handler");
                     if (node.finalizer != null) {
                         this.spaceFormat();
                         this.emit("finally");
                         this.spaceFormat();
-                        path.exec(node.finalizer);
+                        path.traverse("finalizer");
                     }
                     break;
                 case "CatchClause":
                     path.skip();
                     this.emit("catch");
                     this.emit("(");
-                    path.exec(node.param);
+                    path.traverse("param");
                     this.emit(")");
                     this.spaceFormat();
-                    path.exec(node.body);
+                    path.traverse("body");
                     break;
                 case "NewExpression":
                     path.skip();
                     this.emit("new");
                     this.space();
-                    path.exec(node.callee);
+                    path.traverse("callee");
                     this.emit("(");
-                    for (let index = 0;index < node["arguments"].length;index++) {
-                        let value = node["arguments"][index];
-                        path.exec(value);
+                    for (let index = 0; index < node["arguments"].length; index++) {
+                        path.traverse("arguments", index);
                         if (index < node["arguments"].length - 1) {
                             this.emit(",");
                             this.spaceFormat();
@@ -222,11 +217,11 @@ class CodeGenerator {
                     break;
                 case "LabeledStatement":
                     path.skip();
-                    path.exec(node.label);
+                    path.traverse("label");
                     this.spaceFormat();
                     this.emit(":");
                     this.spaceFormat();
-                    path.exec(node.body);
+                    path.traverse("body");
                     this.end();
                     break;
                 case "DebuggerStatement":
@@ -238,11 +233,11 @@ class CodeGenerator {
                     this.emit("switch");
                     this.spaceFormat();
                     this.emit("(");
-                    path.exec(node.discriminant);
+                    path.traverse("discriminant");
                     this.emit(")");
                     this.spaceFormat();
                     this.emit("{");
-                    path.exec(node.cases);
+                    path.traverse("cases");
                     this.emit("}");
                     break;
                 case "SwitchCase":
@@ -250,58 +245,58 @@ class CodeGenerator {
                     if (node.test != null) {
                         this.emit("case");
                         this.space();
-                        path.exec(node.test);
+                        path.traverse("test");
                     } else {
                         this.emit("default");
                     }
                     this.emit(":");
                     this.spaceFormat();
-                    path.exec(node.consequent);
+                    path.traverse("consequent");
                     break;
                 case "WithStatement":
                     path.skip();
                     this.emit("with");
                     this.spaceFormat();
                     this.emit("(");
-                    path.exec(node.object);
+                    path.traverse("object");
                     this.emit(")");
                     this.spaceFormat();
-                    path.exec(node.body);
+                    path.traverse("body");
                     break;
                 case "ThrowStatement":
                     path.skip();
                     this.emit("throw");
                     this.space();
-                    path.exec(node.argument);
+                    path.traverse("argument");
                     this.end();
                     break;
-                    
+
                 case "ForInStatement":
                     path.skip();
                     this.emit("for");
                     this.spaceFormat();
                     this.emit("(");
-                    path.exec(node.left);
+                    path.traverse("left");
                     this.space();
                     this.emit("in");
                     this.space();
-                    path.exec(node.right);
+                    path.traverse("right");
                     this.emit(")");
                     this.spaceFormat();
-                    path.exec(node.body);
+                    path.traverse("body");
                     this.end();
                     break;
                 case "BinaryExpression":
                     path.skip();
-                    path.exec(node.left);
+                    path.traverse("left");
                     if (node.operator != "instanceof" && node.operator != "in") {
-                        if (node.left.isRegex() && node.operator == "/") {
+                        if (node.left.isRegex && node.operator == "/") {
                             this.space();
                         } else {
                             this.spaceFormat();
                         }
                         this.emit(node.operator);
-                        if (node.right.isRegex() && node.operator == "/") {
+                        if (node.right.isRegex && node.operator == "/") {
                             this.space();
                         } else {
                             this.spaceFormat();
@@ -311,16 +306,16 @@ class CodeGenerator {
                         this.emit(node.operator);
                         this.space();
                     }
-                    path.exec(node.right);
+                    path.traverse("right");
                     break;
                 case "UpdateExpression":
                     path.skip();
                     this.emit("(");
                     if (node.prefix) {
                         this.emit(node.operator);
-                        path.exec(node.argument);
+                        path.traverse("argument");
                     } else {
-                        path.exec(node.argument);
+                        path.traverse("argument");
                         this.emit(node.operator);
                     }
                     this.emit(")");
@@ -328,11 +323,11 @@ class CodeGenerator {
                 case "AssignmentExpression":
                     path.skip();
                     this.emit("(");
-                    path.exec(node.left);
+                    path.traverse("left");
                     this.spaceFormat();
                     this.emit(node.operator);
                     this.spaceFormat();
-                    path.exec(node.right);
+                    path.traverse("right");
                     this.emit(")");
                     break;
                 case "UnaryExpression":
@@ -340,49 +335,46 @@ class CodeGenerator {
                     if (node.prefix) {
                         this.emit(node.operator);
                         if (
-                            node.operator == "void" ||
-                            node.operator == "typeof" ||
-                            node.operator == "delete"
-                        ) {
+                        node.operator == "void" || node.operator == "typeof" || node.operator == "delete") {
                             this.space();
                         }
-                        path.exec(node.argument);
+                        path.traverse("argument");
                     } else {
-                        path.exec(node.argument);
+                        path.traverse("argument");
                         this.emit(node.operator);
                     }
                     break;
                 case "MemberExpression":
                     path.skip();
-                    path.exec(node.object);
+                    path.traverse("object");
                     let computedMode = this.computedMode;
                     if (computedMode == "onComputed") {
                         this.emit("[");
                         if (node.property.type == "Identifier" && !node.computed) {
                             this.emit("\"");
-                            path.exec(node.property);
+                            path.traverse("property");
                             this.emit("\"");
                         } else {
-                            path.exec(node.property);
+                            path.traverse("property");
                         }
                         this.emit("]");
                     } else if (computedMode == "offComputed") {
                         if (node.property.type == "Identifier" && !node.computed) {
                             this.emit(".");
-                            path.exec(node.property);
+                            path.traverse("property");
                         } else {
                             this.emit("[");
-                            path.exec(node.property);
+                            path.traverse("property");
                             this.emit("]");
                         }
                     } else {
                         if (node.computed) {
                             this.emit("[");
-                            path.exec(node.property);
+                            path.traverse("property");
                             this.emit("]");
                         } else {
                             this.emit(".");
-                            path.exec(node.property);
+                            path.traverse("property");
                         }
                     }
                     break;
@@ -390,9 +382,8 @@ class CodeGenerator {
                     path.skip();
                     let exprs = node.expressions;
                     let exprsLen = exprs.length;
-                    for (let index = 0;index < exprsLen;index++) {
-                        let value = exprs[index];
-                        path.exec(value);
+                    for (let index = 0; index < exprsLen; index++) {
+                        path.traverse("expressions", index);
                         if (index < exprsLen - 1) {
                             this.emit(",");
                             this.spaceFormat();
@@ -402,29 +393,32 @@ class CodeGenerator {
                 case "ObjectExpression":
                     path.skip();
                     this.emit("{");
-                    for (let index = 0;index < node.properties.length;index++) {
+                    for (let index = 0; index < node.properties.length; index++) {
                         let props = node.properties[index];
-                        let key = props.key;
-                        let value = props.value;
-                        path.exec(key);
-                        this.spaceFormat();
-                        this.emit(":");
-                        this.spaceFormat();
-                        path.exec(value);
+                        path.traverse("properties", index);
                         if (index < node.properties.length - 1) {
                             this.emit(",");
+                            this.spaceFormat();
                         }
                     }
                     this.emit("}");
                     break;
+                case "Property":
+                    path.skip();
+                    path.traverse("key");
+                    this.spaceFormat();
+                    this.emit(":");
+                    this.spaceFormat();
+                    path.traverse("value");
+                    break;
                 case "ArrayExpression":
                     path.skip();
                     this.emit("[");
-                    for (let index = 0;index < node.elements.length;index++) {
-                        let element = node.elements[index];
-                        path.exec(element);
+                    for (let index = 0; index < node.elements.length; index++) {
+                        path.traverse("elements", index);
                         if (index < node.elements.length - 1) {
                             this.emit(",");
+                            this.spaceFormat();
                         }
                     }
                     this.emit("]");
@@ -434,25 +428,24 @@ class CodeGenerator {
                     break;
                 case "ConditionalExpression":
                     path.skip();
-                    path.exec(node.test);
+                    path.traverse("test");
                     this.spaceFormat();
                     this.emit("?");
                     this.spaceFormat();
-                    path.exec(node.consequent);
+                    path.traverse("consequent");
                     this.spaceFormat();
                     this.emit(":");
                     this.spaceFormat();
-                    path.exec(node.alternate);
+                    path.traverse("alternate");
                     break;
                 case "CallExpression":
                     path.skip();
-                    path.exec(node.callee);
+                    path.traverse("callee");
                     this.emit("(");
                     let args = node["arguments"];
                     let argsLen = args.length;
-                    for (let index = 0;index < argsLen;index++) {
-                        let value = args[index];
-                        path.exec(value);
+                    for (let index = 0; index < argsLen; index++) {
+                        path.traverse("arguments", index);
                         if (index < argsLen - 1) {
                             this.emit(",");
                             this.spaceFormat();
@@ -462,7 +455,7 @@ class CodeGenerator {
                     break;
             }
         };
-        obj.exit = (path) => {
+        const exit = obj.exit = (path) => {
             let node = path.node;
             let type = node.type;
             switch (type) {
@@ -476,7 +469,6 @@ class CodeGenerator {
                     this.end();
                     break;
                 case "VariableDeclaration":
-                    this.remove();
                     this.end();
                     break;
                 case "VariableDeclarator":
@@ -514,7 +506,7 @@ class CodeGenerator {
         return this.data[this.data.length - 1];
     }
     generate() {
-        this.transformer.transform(this.ast.body);
+        traverse(this.ast, this.visitorRoot());
         if (this.isFormat()) {
             let result = "";
             let index = 0;
@@ -523,8 +515,7 @@ class CodeGenerator {
                 result += sliceCode;
                 if (sliceCode == ";" && index < this.data.length - 1) {
                     result += "\n";
-                }
-                ++index;
+                }++index;
             }
             return result;
         }

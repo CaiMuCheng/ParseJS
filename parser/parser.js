@@ -38,7 +38,8 @@ import {
     WithStatement,
     ThrowStatement,
     ForInStatement
-} from "../ast/ast.js";
+}
+from "../ast/ast.js";
 import {
     keywordMap,
     EOF,
@@ -53,7 +54,8 @@ import {
     WhiteSpace,
     NewLine,
     Comment
-} from "../token/tokenKind.js";
+}
+from "../token/tokenKind.js";
 
 const errorMessages = {
     unexpectedToken: "Unexpected token '${0}'",
@@ -66,21 +68,20 @@ const errorMessages = {
 
 function format(str) {
     let args = Array.prototype.slice.call(arguments, 1);
-    return str.replace(/\${(\d+)}/g, function (_match, number) {
+    return str.replace(/\${(\d+)}/g, function(_match, number) {
         return typeof args[number] != 'undefined' ? args[number] : "";
     });
 };
 
 class ParseError extends SyntaxError {
     constructor(
-        error,
-        start,
-        end,
-        startLine,
-        startColumn,
-        endLine,
-        endColumn
-    ) {
+    error,
+    start,
+    end,
+    startLine,
+    startColumn,
+    endLine,
+    endColumn) {
         super(error);
         this.start = start;
         this.end = end;
@@ -105,9 +106,9 @@ class Parser {
         if (lastToken != null) {
             if (lastToken.tokenKind != EOF) {
                 let token = new Token(
-                    EOF,
-                    lastToken.end,
-                    lastToken.end);
+                EOF,
+                lastToken.end,
+                lastToken.end);
                 token.startLine = lastToken.endLine;
                 token.startColumn = lastToken.endColumn;
                 token.endLine = lastToken.endLine;
@@ -116,9 +117,9 @@ class Parser {
             }
         } else {
             let token = new Token(
-                EOF,
-                0,
-                0);
+            EOF,
+            0,
+            0);
             token.startLine = 1;
             token.startColumn = 0;
             token.endLine = 1;
@@ -130,13 +131,13 @@ class Parser {
         }
         // set the current node
         this.ast = new Program(
-            0, this.eof.end, [], "module");
+        0, this.eof.end, [], "module");
         this.error = null;
         this.node = {};
         this.parentNode = null;
         this.getToken();
         this.parseBlockOrModuleBlockBody(
-            this.ast.body, this.eof);
+        this.ast.body, this.eof);
     }
     parseBlockOrModuleBlockBody(body, endToken) {
         this.endToken = endToken;
@@ -148,10 +149,9 @@ class Parser {
 
     }
     parseStatement(
-        allowReturnStatement = false,
-        allowBreakStatement = false,
-        allowContinueStatement = false
-    ) {
+    allowReturnStatement = false,
+    allowBreakStatement = false,
+    allowContinueStatement = false) {
         switch (this.token.tokenKind) {
             case keywordMap["var"]:
             case keywordMap["let"]:
@@ -226,8 +226,7 @@ class Parser {
         let argument = this.parseExpression();
         this.semicolon();
         return new ThrowStatement(
-            start, argument.end, argument
-        );
+        start, argument.end, argument);
     }
     parseWithStatement(allowReturnStatement, allowBreakStatement, allowContinueStatement) {
         let start = this.token.start;
@@ -246,8 +245,7 @@ class Parser {
         this.expectVal(")");
         let cases = this.parseSwitchCases(allowReturnStatement, allowContinueStatement);
         return new SwitchStatement(
-            start, this.token.start, discriminant, cases
-        );
+        start, this.token.start, discriminant, cases);
     }
     parseSwitchCases(allowReturnStatement, allowContinueStatement) {
         let cases = [];
@@ -262,16 +260,12 @@ class Parser {
                 this.expectVal("case");
                 let test = this.parseExpression();
                 this.expectVal(":");
-                while (!this.matchVal("}") &&
-                    !this.matchVal("case") &&
-                    !this.matchVal("default")
-                ) {
+                while (!this.matchVal("}") && !this.matchVal("case") && !this.matchVal("default")) {
                     let statement = this.parseStatement(allowReturnStatement, true, allowContinueStatement);
                     consequent.push(statement);
                 }
                 cases.push(
-                    new SwitchCase(start, this.token.start, consequent, test)
-                );
+                new SwitchCase(start, this.token.start, consequent, test));
             } else {
                 let consequent = [];
                 let start = this.token.start;
@@ -283,8 +277,7 @@ class Parser {
                     consequent.push(statement);
                 }
                 cases.push(
-                    new SwitchCase(start, this.token.start, consequent, test)
-                );
+                new SwitchCase(start, this.token.start, consequent, test));
             }
         }
         this.expectVal("}");
@@ -296,15 +289,13 @@ class Parser {
         let end = this.token.end;
         this.semicolon();
         return new DebuggerStatement(
-            start, end
-        );
+        start, end);
     }
     parseLabeledStatement(label, allowReturnStatement, allowBreakStatement, allowContinueStatement) {
         this.nextToken();
         let body = this.parseStatement(allowReturnStatement, allowBreakStatement, allowContinueStatement);
         return new LabeledStatement(
-            label.start, body.end, body, label
-        );
+        label.start, body.end, body, label);
     }
     parseBlock(allowReturnStatement = false, allowBreakStatement = false, allowContinueStatement = false) {
         let start = this.token.start;
@@ -324,10 +315,9 @@ class Parser {
         this.expectVal("}");
         let end = this.token.start;
         let blockStatement = new BlockStatement(
-            start,
-            end,
-            body
-        );
+        start,
+        end,
+        body);
         return blockStatement;
     }
     parseVarStatement(kind) {
@@ -335,10 +325,10 @@ class Parser {
         this.nextToken();
         // build variable declaration
         let variableDeclaration = new VariableDeclaration(
-            start,
-            /* placeholder */
-            null, [],
-            kind);
+        start,
+        /* placeholder */
+        null, [],
+        kind);
         this.parseVar(variableDeclaration);
         variableDeclaration.end = this.token.end;
         this.semicolon();
@@ -351,11 +341,11 @@ class Parser {
         while (!this.match(this.endTokenKind)) {
             let identifier = this.parseIdentifier();
             let declarator = new VariableDeclarator(
-                identifier.start,
-                /* placeholder */
-                null,
-                identifier,
-                null);
+            identifier.start,
+            /* placeholder */
+            null,
+            identifier,
+            null);
             declarator.init = this.eatVal('=') ? this.parseExpression(false) : null;
             declarator.end = this.token.start;
             declarators.push(declarator);
@@ -386,7 +376,7 @@ class Parser {
             }
         } else {
             consequent = this.parseStatement(allowReturnStatement, allowBreakStatement, allowContinueStatement);
-            
+
             if (this.matchVal("else")) {
                 let elseStart = this.token.start;
                 this.nextToken();
@@ -402,12 +392,11 @@ class Parser {
         let end = this.token.start;
         this.semicolon();
         return new IfStatement(
-            start,
-            end,
-            test,
-            consequent,
-            alternate
-        );
+        start,
+        end,
+        test,
+        consequent,
+        alternate);
     }
     parseWhileStatement(allowReturnStatement = false) {
         let start = this.index;
@@ -429,8 +418,7 @@ class Parser {
             this.semicolon();
         }
         return new WhileStatement(
-            start, end, test, body
-        );
+        start, end, test, body);
     }
     parseForStatement(allowReturnStatement = false) {
         let start = this.index;
@@ -439,22 +427,16 @@ class Parser {
         let init = null;
         let left = null;
         if (!this.matchVal(";")) {
-            if (this.matchVal("var") ||
-                this.matchVal("let") ||
-                this.matchVal("const")
-            ) {
+            if (this.matchVal("var") || this.matchVal("let") || this.matchVal("const")) {
                 let start = this.index;
                 let begin = this.token.start;
                 this.nextToken();
                 let id = this.parseIdentifier();
                 if (this.eatVal("in")) {
                     init = new VariableDeclaration(
-                        begin, id.end, [
-                            new VariableDeclarator(
-                                id.start, id.end, id
-                            )
-                        ], null
-                    );
+                    begin, id.end, [
+                    new VariableDeclarator(
+                    id.start, id.end, id)], null);
                     left = init;
                 } else {
                     this.index = start;
@@ -472,7 +454,7 @@ class Parser {
         } else {
             this.expectVal(";");
         }
-        
+
         if (left != null) {
             let right = this.parseExpression();
             this.expectVal(")");
@@ -490,10 +472,9 @@ class Parser {
                 this.semicolon();
             }
             return new ForInStatement(
-                start, this.token.start, left, right, body
-            );
+            start, this.token.start, left, right, body);
         }
-        
+
         let test = null;
         if (!this.matchVal(";")) {
             test = this.parseExpression();
@@ -518,13 +499,12 @@ class Parser {
             this.semicolon();
         }
         return new ForStatement(
-            start,
-            end,
-            init,
-            test,
-            update,
-            body
-        );
+        start,
+        end,
+        init,
+        test,
+        update,
+        body);
     }
     parseDoWhileStatement(allowReturnStatement = false) {
         let start = this.index;
@@ -537,11 +517,10 @@ class Parser {
         let end = this.token.start;
         this.semicolon();
         return new DoWhileStatement(
-            start,
-            end,
-            body,
-            test
-        );
+        start,
+        end,
+        body,
+        test);
     }
     parseBreakStatement() {
         let start = this.token.start;
@@ -562,8 +541,7 @@ class Parser {
             this.semicolon();
         }
         return new BreakStatement(
-            start, this.token.start, label
-        );
+        start, this.token.start, label);
     }
     parseContinueStatement() {
         let start = this.token.start;
@@ -584,8 +562,7 @@ class Parser {
             this.semicolon();
         }
         return new ContinueStatement(
-            start, this.token.start, label
-        );
+        start, this.token.start, label);
     }
     parseTryStatement(allowReturnStatement, allowBreakStatement, allowContinueStatement) {
         let start = this.token.start;
@@ -602,10 +579,8 @@ class Parser {
             finalizer = this.parseBlock(allowReturnStatement, allowBreakStatement, allowContinueStatement);
         }
         return new TryStatement(
-            start, this.token.start, block, new CatchClause(
-                catchClauseStart, this.token.start, param, body
-            ), finalizer
-        );
+        start, this.token.start, block, new CatchClause(
+        catchClauseStart, this.token.start, param, body), finalizer);
     }
     parseFunctionStatement() {
         let start = this.token.start;
@@ -614,15 +589,14 @@ class Parser {
         let params = this.parseIdArguments();
         let body = this.parseBlock(true);
         return new FunctionDeclaration(
-            start,
-            body.end,
-            id,
-            false,
-            false,
-            false,
-            params,
-            body
-        );
+        start,
+        body.end,
+        id,
+        false,
+        false,
+        false,
+        params,
+        body);
     }
     parseFunctionExpression() {
         // parse function expression
@@ -652,8 +626,7 @@ class Parser {
         // parse body
         let body = this.parseBlock(true);
         return new FunctionExpression(
-            start, body.end, id, _async, generator, false, params, body
-        );
+        start, body.end, id, _async, generator, false, params, body);
     }
     parseReturnStatement() {
         let start = this.token.start;
@@ -671,17 +644,14 @@ class Parser {
             this.semicolon();
         }
         return new ReturnStatement(
-            start, this.token.start, argument
-        );
+        start, this.token.start, argument);
     }
     parseIdArguments() {
         this.expectVal("(");
         let commaCount = 0;
         let params = [];
         let tag = -1;
-        while (
-            !this.matchVal(")")
-        ) {
+        while (!this.matchVal(")")) {
             // parse the expressions.
             params.push(this.parseIdentifier());
             if (this.matchVal(")")) {
@@ -714,9 +684,7 @@ class Parser {
         let commaCount = 0;
         let params = [];
         let tag = -1;
-        while (
-            !this.matchVal(")")
-        ) {
+        while (!this.matchVal(")")) {
             // parse the expressions.
             params.push(this.parseExpression(false));
             if (this.matchVal(")")) {
@@ -749,17 +717,15 @@ class Parser {
             this.unexpected();
         }
         return new EmptyStatement(
-            this.token.start,
-            this.token.end
-        );
+        this.token.start,
+        this.token.end);
     }
     parseExpressionStatement() {
         let expr = this.parseExpression();
         let expressionStatement = new ExpressionStatement(
-            expr.start,
-            expr.end,
-            expr
-        );
+        expr.start,
+        expr.end,
+        expr);
         return expressionStatement;
     }
     parseExpression(parseSequence = true, parseIn = true) {
@@ -771,21 +737,8 @@ class Parser {
         }
 
         while (
-            (
-                this.match(Operator) ||
-                this.matchVal("instanceof") ||
-                this.matchVal("in")
-            ) &&
-            !this.matchVal(")") &&
-            !this.matchVal("]") &&
-            !this.matchVal("{") &&
-            !this.matchVal("}") &&
-            !this.matchVal(";") &&
-            !this.matchVal("?") &&
-            !this.matchVal(":") &&
-            !this.matchVal(",") &&
-            !this.matchVal(".")
-        ) {
+        (
+        this.match(Operator) || this.matchVal("instanceof") || this.matchVal("in")) && !this.matchVal(")") && !this.matchVal("]") && !this.matchVal("{") && !this.matchVal("}") && !this.matchVal(";") && !this.matchVal("?") && !this.matchVal(":") && !this.matchVal(",") && !this.matchVal(".")) {
             let opLevel = this.level();
             let op = this.token.value;
             let start = this.index;
@@ -805,10 +758,7 @@ class Parser {
                 break;
             }
             if (
-                left.type == "UpdateExpression" &&
-                right.type == "UpdateExpression" &&
-                op == "("
-            ) {
+            left.type == "UpdateExpression" && right.type == "UpdateExpression" && op == "(") {
                 this.index = start;
                 this.getToken();
                 this.throwError(errorMessages.invalidLeftHandSide);
@@ -816,30 +766,27 @@ class Parser {
 
             if (lastOpLevel == -1) {
                 left = new BinaryExpression(
-                    left.start,
-                    right.end,
-                    left,
-                    op,
-                    right
-                );
+                left.start,
+                right.end,
+                left,
+                op,
+                right);
 
             } else if (opLevel > lastOpLevel) {
                 left.right = new BinaryExpression(
-                    left.right.start,
-                    right.end,
-                    left.right,
-                    op,
-                    right
-                );
+                left.right.start,
+                right.end,
+                left.right,
+                op,
+                right);
                 left.end = left.right.end;
             } else {
                 left = new BinaryExpression(
-                    left.start,
-                    right.end,
-                    left,
-                    op,
-                    right
-                );
+                left.start,
+                right.end,
+                left,
+                op,
+                right);
             }
             lastOpLevel = opLevel;
         }
@@ -855,7 +802,7 @@ class Parser {
             this.nextToken();
             let factorStart = this.index;
             let factor = this.factor(parseSequence);
-            
+
             if (factor == null) {
                 this.index = this.lastFactorStart;
                 this.getToken();
@@ -865,13 +812,10 @@ class Parser {
                 this.index = this.lastFactorStart;
                 this.getToken();
                 this.throwError(
-                    errorMessages.invalidLeftHandSide,
-                    []
-                );
+                errorMessages.invalidLeftHandSide, []);
             }
             result = new UpdateExpression(
-                start, factor.end, op, true, factor
-            );
+            start, factor.end, op, true, factor);
         } else if (this.match(Id)) {
             let idStart = this.index;
             let id = this.parseIdentifier();
@@ -888,15 +832,13 @@ class Parser {
                 this.nextToken();
                 let right = this.parseExpression();
                 result = new AssignmentExpression(
-                    id.start, right.end, op, id, right
-                );
+                id.start, right.end, op, id, right);
             } else {
                 result = id;
             }
         } else if (this.matchVal("this")) {
             let thisExpression = new ThisExpression(
-                this.token.start, this.token.end
-            );
+            this.token.start, this.token.end);
             this.nextToken();
             result = thisExpression;
         } else if (this.eatVal("(")) {
@@ -923,8 +865,7 @@ class Parser {
                 }
             }
             let arrayExpression = new ArrayExpression(
-                start, this.token.start, elements
-            );
+            start, this.token.start, elements);
             result = arrayExpression;
         } else if (this.matchVal("{")) {
             let start = this.token.start;
@@ -949,17 +890,9 @@ class Parser {
                 }
             }
             result = new ObjectExpression(
-                start, this.token.start, properties
-            );
+            start, this.token.start, properties);
         } else if (
-            this.matchVal("+") ||
-            this.matchVal("-") ||
-            this.matchVal("~") ||
-            this.matchVal("!") ||
-            this.matchVal("void") ||
-            this.matchVal("typeof") ||
-            this.matchVal("delete")
-        ) {
+        this.matchVal("+") || this.matchVal("-") || this.matchVal("~") || this.matchVal("!") || this.matchVal("void") || this.matchVal("typeof") || this.matchVal("delete")) {
             let tokenStart = this.index;
             let start = this.token.start;
             let op = this.token.value;
@@ -972,12 +905,11 @@ class Parser {
             }
             let end = argument.end;
             let unaryExpression = new UnaryExpression(
-                start,
-                end,
-                op,
-                true,
-                argument
-            );
+            start,
+            end,
+            op,
+            true,
+            argument);
             result = unaryExpression
         } else if (this.matchVal("function")) {
             let functionExpression = this.parseFunctionExpression();
@@ -996,80 +928,74 @@ class Parser {
                 args = [];
             }
             let newExpression = new NewExpression(
-                start, this.token.start, callee, args
-            );
+            start, this.token.start, callee, args);
             result = newExpression;
         } else {
             let literal = this.parseLiteral();
             result = literal;
         }
-        
+
         let handle = false;
         do {
-        handle = false;
-        if (result != null && (this.matchVal(".") || this.matchVal("["))) {
-            while (this.matchVal(".") || this.matchVal("[")) {
-                let computed = this.matchVal("[");
-                this.nextToken();
-                let id = null;
-                if (computed) {
-                    id = this.parseExpression();
-                    this.expectVal("]");
-                } else {
-                    id = this.parseIdentifier(true);
+            handle = false;
+            if (result != null && (this.matchVal(".") || this.matchVal("["))) {
+                while (this.matchVal(".") || this.matchVal("[")) {
+                    let computed = this.matchVal("[");
+                    this.nextToken();
+                    let id = null;
+                    if (computed) {
+                        id = this.parseExpression();
+                        this.expectVal("]");
+                    } else {
+                        id = this.parseIdentifier(true);
+                    }
+                    result = new MemberExpression(
+                    result.start, id.end, result, id, computed, false);
                 }
-                result = new MemberExpression(
-                    result.start, id.end, result, id, computed, false
-                );
-            }
-            handle = true;
-        }
-
-        if (result != null && this.matchVal("(")) {
-            while (this.matchVal("(")) {
-                let args = this.parseExpressionArguments();
-                let end = this.token.start;
-                result = new CallExpression(
-                    result.start, end, result, args, false
-                );
-            }
-            handle = true;
-        }
-        if (result != null && this.isUpdate()) {
-            if (result.type != "Identifier" && result.type != "MemberExpression") {
-                this.throwError(errorMessages.invalidLeftHandSide);
-            } else {
-                result = new UpdateExpression(
-                    result.start, this.token.end, this.token.value, false, result
-                );
-                this.nextToken();
                 handle = true;
             }
-        }
-        
-        if (result != null && parseSequence && this.matchVal(",")) {
-            let expressions = [result];
-            while (this.matchVal(",")) {
-                this.nextToken();
-                expressions.push(this.parseExpression(false));
+
+            if (result != null && this.matchVal("(")) {
+                while (this.matchVal("(")) {
+                    let args = this.parseExpressionArguments();
+                    let end = this.token.start;
+                    result = new CallExpression(
+                    result.start, end, result, args, false);
+                }
+                handle = true;
             }
-            result = new SequenceExpression(
-                result.start, this.token.start, expressions
-            );
-            handle = true;
-        }
-        
-        if (result != null && this.matchVal("?")) {
-            this.nextToken();
-            let consequent = this.parseExpression(false);
-            this.expectVal(":");
-            let alternate = this.parseExpression(false);
-            result = new ConditionalExpression(
-                result.start, this.token.start, result, consequent, alternate
-            );
-            handle = true;
-        }
-        } while(handle);
+            if (result != null && this.isUpdate()) {
+                if (result.type != "Identifier" && result.type != "MemberExpression") {
+                    this.throwError(errorMessages.invalidLeftHandSide);
+                } else {
+                    result = new UpdateExpression(
+                    result.start, this.token.end, this.token.value, false, result);
+                    this.nextToken();
+                    handle = true;
+                }
+            }
+
+            if (result != null && parseSequence && this.matchVal(",")) {
+                let expressions = [result];
+                while (this.matchVal(",")) {
+                    this.nextToken();
+                    expressions.push(this.parseExpression(false));
+                }
+                result = new SequenceExpression(
+                result.start, this.token.start, expressions);
+                handle = true;
+            }
+
+            if (result != null && this.matchVal("?")) {
+                this.nextToken();
+                let consequent = this.parseExpression(false);
+                this.expectVal(":");
+                let alternate = this.parseExpression(false);
+                result = new ConditionalExpression(
+                result.start, this.token.start, result, consequent, alternate);
+                handle = true;
+            }
+        } while (handle);
         this.lastFactorStart = factorStart;
         return result;
     }
@@ -1080,17 +1006,11 @@ class Parser {
     }
     parseIdentifierForce() {
         if (
-            (this.token.realType != null && this.token.realType === Keyword) ||
-            this.match(Id) ||
-            this.match(Str) ||
-            this.match(Num) ||
-            this.match(Special)
-        ) {
+        (this.token.realType != null && this.token.realType === Keyword) || this.match(Id) || this.match(Str) || this.match(Num) || this.match(Special)) {
             let id = new Identifier(
-                this.token.start,
-                this.token.end,
-                this.token.value
-            );
+            this.token.start,
+            this.token.end,
+            this.token.value);
             this.nextToken();
             return id;
         }
@@ -1098,9 +1018,9 @@ class Parser {
     }
     parseIdentifier(allowKeyword = false) {
         let id = new Identifier(
-            this.token.start,
-            this.token.end,
-            this.token.value);
+        this.token.start,
+        this.token.end,
+        this.token.value);
         if (allowKeyword && keywordMap[this.token.value] != null) {
             this.nextToken();
         } else {
@@ -1110,20 +1030,15 @@ class Parser {
     }
     parseLiteral() {
         let literal = new Literal(
-            this.token.start,
-            this.token.end,
-            this.token.value,
-            JSON.stringify(this.token.value)
-        );
+        this.token.start,
+        this.token.end,
+        this.token.value,
+        JSON.stringify(this.token.value));
 
         if (
-            this.match(Str) ||
-            this.match(Num) ||
-            this.match(Special) ||
-            this.match(Regex)
-        ) {
+        this.match(Str) || this.match(Num) || this.match(Special) || this.match(Regex)) {
             if (this.match(Regex)) {
-                literal.isRegex = function () { return true; }
+                literal.isRegex = true;
             }
             this.nextToken();
             return literal;
@@ -1133,10 +1048,7 @@ class Parser {
     getToken() {
         this.getTokenDef();
         while (
-            this.match(WhiteSpace) ||
-            this.match(NewLine) ||
-            this.match(Comment)
-        ) {
+        this.match(WhiteSpace) || this.match(NewLine) || this.match(Comment)) {
             ++this.index;
             this.getTokenDef();
         }
@@ -1200,17 +1112,16 @@ class Parser {
         }
     }
     throwError(
-        error,
-        formatedArgs = [],
-        start = this.token.start,
-        end = this.token.end,
-        startLine = this.token.startLine,
-        startColumn = this.token.startColumn,
-        endLine = this.token.endLine,
-        endColumn = this.token.endColumn
-    ) {
+    error,
+    formatedArgs = [],
+    start = this.token.start,
+    end = this.token.end,
+    startLine = this.token.startLine,
+    startColumn = this.token.startColumn,
+    endLine = this.token.endLine,
+    endColumn = this.token.endColumn) {
         let concated = [error].concat(formatedArgs);
-        let composingText = format.apply(null, concated) + " " + `(#${startLine}:${startColumn}-#${endLine}:${endColumn})`
+        let composingText = format.apply(null, concated) + " " + "(#" + startLine + ":" + startColumn + " - #" + endLine + ":" + endColumn + ")";
         throw new ParseError(composingText, start, end, startLine, startColumn, endLine, endColumn);
     }
     unexpected() {

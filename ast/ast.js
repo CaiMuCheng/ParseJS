@@ -4,8 +4,6 @@ class AstNode {
         this.start = start;
         this.end = end;
     }
-    isAstNode() { return true; }
-    isRegex() { return false; }
 }
 
 class Program extends AstNode {
@@ -383,7 +381,43 @@ class SourceCode extends AstNode {
 }
 
 const visitorKeys = {
-    
+    Identifier: ["name"],
+    Literal: ["value", "raw"],
+    Program: ["body", "sourceType"],
+    ExpressionStatement: ["expression"],
+    BlockStatement: ["body"],
+    IfStatement: ["test", "consequen", "alternate"],
+    WhileStatement: ["body"],
+    ForStatement: ["init", "test", "update", "body"],
+    DoWhileStatement: ["body", "test"],
+    BreakStatement: ["label"],
+    ContinueStatement: ["label"],
+    TryStatement: ["block", "handler", "finalizer"],
+    CatchClause: ["param", "body"],
+    ReturnStatement: ["argument"],
+    VariableDeclaration: ["declarations"],
+    VariableDeclarator: ["id", "init"],
+    BinaryExpression: ["left", "right"],
+    UnaryExpression: ["argument"],
+    UpdateExpression: ["argument"],
+    AssignmentExpression: ["left", "right"],
+    ConditionalExpression: ["test", "consequent", "alternate"],
+    ArrayExpression: ["elements"],
+    SequenceExpression: ["expressions"],
+    ObjectExpression: ["properties"],
+    Property: ["key", "value"],
+    LabeledStatement: ["label", "body"],
+    SwitchStatement: ["discriminant", "cases"],
+    SwitchCase: ["test", "consequent"],
+    WithStatement: ["object", "body"],
+    ThrowStatement: ["argument"],
+    ForInStatement: ["left", "right", "body"],
+    FunctionExpression: ["params", "body"],
+    FunctionDeclaration: ["params", "body"],
+    CallExpression: ["callee", "arguments"],
+    MemberExpression: ["object", "property"],
+    NewExpression: ["callee", "arguments"],
+    SourceCode: ["source"]
 };
 
 export {

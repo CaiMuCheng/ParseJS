@@ -1,21 +1,23 @@
 import fs from "fs";
 import {
     Tokenizer
-} from "./lexer/lexer.js";
+}
+from "./lexer/lexer.js";
 import * as Ast from "./ast/ast.js";
-import {
-    Transformer
-} from "./transform/transformer.js";
+import traverse from "./traverse/traverse.js";
 import {
     CodeGenerator
-} from "./codegen/codegen.js";
+}
+from "./codegen/codegen.js";
 import {
     EOF,
     NewLine
-} from "./token/tokenKind.js";
+}
+from "./token/tokenKind.js";
 import {
     Parser
-} from "./parser/parser.js";
+}
+from "./parser/parser.js";
 
 function makeIndex(tokens) {
     // for each the token, we needed to transform index to line column.
@@ -44,15 +46,13 @@ function makeIndex(tokens) {
                     column = 0;
                 } else {
                     ++column;
-                }
-                ++valueIndex;
+                }++valueIndex;
             }
             token.startLine = startLine;
             token.startColumn = startColumn;
             token.endLine = line;
             token.endColumn = column;
-        }
-        ++index;
+        }++index;
     }
 }
 
@@ -73,11 +73,10 @@ function tokenizeAll(str) {
 }
 
 function codegen(
-    ast,
-    format = false,
-    computedMode = "default",
-    bracketForExpressionStatement = false
-) {
+ast,
+format = false,
+computedMode = "default",
+bracketForExpressionStatement = false) {
     const codeGenerator = new CodeGenerator(ast);
     codeGenerator.setFormat(format);
     codeGenerator.setComputedMode(computedMode);
@@ -91,13 +90,24 @@ function generateAST(tokens) {
     return parser.ast;
 }
 
-var source = fs.readFileSync("./input.js").toString();
+const source = fs.readFileSync("./input.js")
+    .toString();
 
-var tokens = tokenizeAll(source);
+const tokens = tokenizeAll(source);
 fs.writeFileSync("./tokens.txt", tokens.join("\n"));
 
-var ast = generateAST(tokens);
+const ast = generateAST(tokens);
+traverse(ast, {
+    enter(path) {
+        if (path.node.type == "Program") {
+            return;
+        }
+        if (path.node.type == "VariableDeclarator") {
+            //path.replaceWithSource("acc")
+        }
+    }
+});
 fs.writeFileSync("./ast.json", JSON.stringify(ast, null, 2));
 
-var code = codegen(ast, true);
+const code = codegen(ast, true);
 fs.writeFileSync("./output.js", code);

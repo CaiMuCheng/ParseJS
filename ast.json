@@ -1,17 +1,17 @@
 {
   "type": "Program",
   "start": 0,
-  "end": 17,
+  "end": 77,
   "body": [
     {
       "type": "VariableDeclaration",
       "start": 0,
-      "end": 17,
+      "end": 14,
       "declarations": [
         {
           "type": "VariableDeclarator",
           "start": 4,
-          "end": 16,
+          "end": 11,
           "id": {
             "type": "Identifier",
             "start": 4,
@@ -21,9 +21,170 @@
           "init": {
             "type": "Literal",
             "start": 8,
+            "end": 10,
+            "value": "10",
+            "raw": "\"10\""
+          }
+        }
+      ],
+      "kind": "var"
+    },
+    {
+      "type": "VariableDeclaration",
+      "start": 11,
+      "end": 42,
+      "declarations": [
+        {
+          "type": "VariableDeclarator",
+          "start": 15,
+          "end": 39,
+          "id": {
+            "type": "Identifier",
+            "start": 15,
             "end": 16,
-            "value": "/a\\/b/gm",
-            "raw": "\"/a\\\\/b/gm\""
+            "name": "c"
+          },
+          "init": {
+            "type": "BinaryExpression",
+            "start": 19,
+            "end": 38,
+            "left": {
+              "type": "FunctionExpression",
+              "start": 19,
+              "end": 35,
+              "id": {
+                "type": "Identifier",
+                "start": 28,
+                "end": 29,
+                "name": "a"
+              },
+              "expression": false,
+              "generator": false,
+              "async": false,
+              "params": [],
+              "body": {
+                "type": "BlockStatement",
+                "start": 32,
+                "end": 35,
+                "body": []
+              }
+            },
+            "operator": "+",
+            "right": {
+              "type": "Literal",
+              "start": 37,
+              "end": 38,
+              "value": "5",
+              "raw": "\"5\""
+            }
+          }
+        }
+      ],
+      "kind": "var"
+    },
+    {
+      "type": "VariableDeclaration",
+      "start": 39,
+      "end": 65,
+      "declarations": [
+        {
+          "type": "VariableDeclarator",
+          "start": 43,
+          "end": 62,
+          "id": {
+            "type": "Identifier",
+            "start": 43,
+            "end": 44,
+            "name": "d"
+          },
+          "init": {
+            "type": "ObjectExpression",
+            "start": 47,
+            "end": 62,
+            "properties": [
+              {
+                "type": "Property",
+                "start": 49,
+                "end": 53,
+                "method": false,
+                "shorthand": false,
+                "computed": false,
+                "key": {
+                  "type": "Identifier",
+                  "start": 49,
+                  "end": 50,
+                  "name": "a"
+                },
+                "value": {
+                  "type": "Identifier",
+                  "start": 52,
+                  "end": 53,
+                  "name": "x"
+                },
+                "kind": "init"
+              },
+              {
+                "type": "Property",
+                "start": 55,
+                "end": 59,
+                "method": false,
+                "shorthand": false,
+                "computed": false,
+                "key": {
+                  "type": "Identifier",
+                  "start": 55,
+                  "end": 56,
+                  "name": "e"
+                },
+                "value": {
+                  "type": "Identifier",
+                  "start": 58,
+                  "end": 59,
+                  "name": "e"
+                },
+                "kind": "init"
+              }
+            ]
+          }
+        }
+      ],
+      "kind": "var"
+    },
+    {
+      "type": "VariableDeclaration",
+      "start": 62,
+      "end": 77,
+      "declarations": [
+        {
+          "type": "VariableDeclarator",
+          "start": 66,
+          "end": 77,
+          "id": {
+            "type": "Identifier",
+            "start": 66,
+            "end": 67,
+            "name": "f"
+          },
+          "init": {
+            "type": "ArrayExpression",
+            "start": 70,
+            "end": 77,
+            "elements": [
+              {
+                "type": "Literal",
+                "start": 71,
+                "end": 72,
+                "value": "1",
+                "raw": "\"1\""
+              },
+              {
+                "type": "Literal",
+                "start": 74,
+                "end": 75,
+                "value": "2",
+                "raw": "\"2\""
+              }
+            ]
           }
         }
       ],
