@@ -1,0 +1,12 @@
+{
+  "name": "parsejs",
+  "version": "1.0.0",
+  "description": "A Lite EcmaScript Parser",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "CaiMuCheng",
+  "license": "ISC"
+}
