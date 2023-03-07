@@ -177,6 +177,8 @@ class Parser {
                     this.throwError(format(errorMessages.illegalStatement, "continue"));
                 }
                 return this.parseContinueStatement();
+            case keywordMap["async"]:
+                return this.parseFunctionStatement();
             case keywordMap["function"]:
                 return this.parseFunctionStatement();
             case keywordMap["return"]:
@@ -584,7 +586,17 @@ class Parser {
     }
     parseFunctionStatement() {
         let start = this.token.start;
+        let generator = false;
+        let _async = false;
+        if (this.matchVal("async")) {
+            _async = true;
+            this.nextToken();
+        }
         this.nextToken();
+        if (this.matchVal("*")) {
+            generator = true;
+            this.nextToken();
+        }
         let id = this.parseIdentifier();
         let params = this.parseIdArguments();
         let body = this.parseBlock(true);
@@ -593,8 +605,8 @@ class Parser {
         body.end,
         id,
         false,
-        false,
-        false,
+        generator,
+        _async,
         params,
         body);
     }

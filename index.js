@@ -97,16 +97,6 @@ const tokens = tokenizeAll(source);
 fs.writeFileSync("./tokens.txt", tokens.join("\n"));
 
 const ast = generateAST(tokens);
-traverse(ast, {
-    enter(path) {
-        if (path.node.type == "Program") {
-            return;
-        }
-        if (path.node.type == "VariableDeclarator") {
-            //path.replaceWithSource("acc")
-        }
-    }
-});
 fs.writeFileSync("./ast.json", JSON.stringify(ast, null, 2));
 
 const code = codegen(ast, true);
