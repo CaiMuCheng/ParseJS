@@ -1,5 +1,5 @@
 import * as AST from "../ast/index.js";
-import * as Token from "../token/index.js";
+import * as Tokens from "../token/index.js";
 
 const {
     Program,
@@ -57,7 +57,7 @@ const {
     WhiteSpace,
     NewLine,
     Comment
-} = Token;
+} = Tokens;
 
 const errorMessages = {
     unexpectedToken: "Unexpected token '${0}'",
@@ -1051,7 +1051,30 @@ class Parser {
 
         if (
             this.match(Str) || this.match(Num) || this.match(Special) || this.match(Regex)) {
+            if (this.match(Str)) {
+                literal.value = this.token.value;
+            }
+            if (this.match(Num)) {
+                if (this.token.value.length > 2 && this.token.value.substring(0, 2) == "0x") {
+                    literal.value = parseInt(this.token.value)
+                } else {
+                    literal.value = Number(this.token.value);
+                }
+                literal.rawValue = this.token.value;
+            }
+            if (this.match(Special)) {
+                if (this.token.value == "true") {
+                    literal.value = true;
+                }
+                if (this.token.value == "false") {
+                    literal.value = false;
+                }
+                if (this.token.value == "null") {
+                    literal.value = null;
+                }
+            }
             if (this.match(Regex)) {
+                literal.value = this.token.value;
                 literal.isRegex = true;
             }
             this.nextToken();

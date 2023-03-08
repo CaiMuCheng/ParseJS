@@ -44,7 +44,11 @@ class CodeGenerator {
                     this.emit(node.name);
                     break;
                 case "Literal":
-                    this.emit(node.value);
+                    if (typeof node.value == "number") {
+                        this.emit(node.rawValue);
+                    } else {
+                        this.emit(node.value);
+                    }
                     break;
                 case "VariableDeclaration":
                     this.emit(node.kind);

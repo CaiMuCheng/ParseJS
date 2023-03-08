@@ -1,9 +1,9 @@
 import fs from "fs";
+import { EOF, NewLine } from "./token/index.js";
 import { Tokenizer } from "./lexer/index.js";
 import { CodeGenerator } from "./codegen/index.js";
-import { EOF, NewLine } from "./token/index.js";
 import { Parser } from "./parser/index.js";
-import Interpreter from "./interpreter/index.js";
+import { Interpreter } from "./interpreter/index.js";
 
 function makeIndex(tokens) {
     // for each the token, we needed to transform index to line column.
@@ -58,6 +58,12 @@ function tokenizeAll(str) {
     return tokens;
 }
 
+function generateAST(tokens) {
+    const parser = new Parser(tokens);
+    parser.parseProgram();
+    return parser.ast;
+}
+
 function codegen(
     ast,
     format = false,
@@ -70,10 +76,22 @@ function codegen(
     return codeGenerator.generate();
 }
 
-function generateAST(tokens) {
-    const parser = new Parser(tokens);
-    parser.parseProgram();
-    return parser.ast;
+function interprete(
+    ast,
+    topLevelScope = global
+) {
+    const interpreter = new Interpreter(ast);
+    interprete.topLevelScope = topLevelScope;
+    return interpreter.interprete();
+}
+
+function internalScope() {
+    const object = {
+        toString() {
+            return "[object InternalScope]";
+        }
+    };
+    return object;
 }
 
 const source = fs.readFileSync("./input.js")
@@ -87,3 +105,6 @@ fs.writeFileSync("./ast.json", JSON.stringify(ast, null, 2));
 
 const code = codegen(ast, true);
 fs.writeFileSync("./output.js", code);
+
+const result = interprete(ast, internalScope());
+console.log(result);
