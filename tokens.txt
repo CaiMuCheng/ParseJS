@@ -68,3 +68,13 @@ startColumn=8,
 endLine=1,
 endColumn=10
 )
+Token(
+tokenKind=WhiteSpace,
+start=10,
+end=11,
+value=# #,
+startLine=1,
+startColumn=10,
+endLine=1,
+endColumn=11
+)

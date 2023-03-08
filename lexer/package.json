@@ -1,0 +1,7 @@
+{
+    "name": "@parsejs/lexer",
+    "version": "1.0.0",
+    "description": "Tokenize sources",
+    "main": "./index.js",
+    "type": "module"
+}

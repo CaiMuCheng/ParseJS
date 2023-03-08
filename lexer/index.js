@@ -1,4 +1,4 @@
-import * as tokenKind from "../token/tokenKind.js";
+import * as tokenKind from "../token/index.js";
 const {
     Token, keywordMap,
     isKeyword, isOperator, isSpecial, priorities,
@@ -63,9 +63,9 @@ class Tokenizer {
         if (this.isEOF()) {
             // EOF Token
             return new Token(
-            EOF,
-            this.index,
-            this.index,
+                EOF,
+                this.index,
+                this.index,
                 '\u0000');
         }
         // Comment first
@@ -78,10 +78,10 @@ class Tokenizer {
                 }
                 let end = this.index;
                 let token = new Token(
-                Comment,
-                start,
-                end,
-                this.content.substring(start, end));
+                    Comment,
+                    start,
+                    end,
+                    this.content.substring(start, end));
                 token.isMultiComment = false;
                 this.state.lastToken = token;
                 return token;
@@ -100,10 +100,10 @@ class Tokenizer {
                 }
                 let end = this.index;
                 let token = new Token(
-                Comment,
-                start,
-                end,
-                this.content.substring(start, end));
+                    Comment,
+                    start,
+                    end,
+                    this.content.substring(start, end));
                 token.isMultiComment = true;
                 this.state.lastToken = token;
                 return token;
@@ -121,10 +121,10 @@ class Tokenizer {
             }
             let end = this.index;
             let token = new Token(
-            NewLine,
-            start,
-            end,
-            this.content.substring(start, end));
+                NewLine,
+                start,
+                end,
+                this.content.substring(start, end));
             this.state.lastToken = token;
             return token;
         }
@@ -137,10 +137,10 @@ class Tokenizer {
             }
             let end = this.index;
             let token = new Token(
-            WhiteSpace,
-            start,
-            end,
-            this.content.substring(start, end));
+                WhiteSpace,
+                start,
+                end,
+                this.content.substring(start, end));
             return token;
         }
 
@@ -182,10 +182,10 @@ class Tokenizer {
                 }
                 let end = this.index;
                 let token = new Token(
-                Str,
-                start,
-                end,
-                this.content.substring(start, end));
+                    Str,
+                    start,
+                    end,
+                    this.content.substring(start, end));
                 this.state.lastToken = token;
                 return token;
             }
@@ -225,10 +225,10 @@ class Tokenizer {
                 }
                 let end = this.index;
                 let token = new Token(
-                Str,
-                start,
-                end,
-                this.content.substring(start, end));
+                    Str,
+                    start,
+                    end,
+                    this.content.substring(start, end));
                 token.isTemplate = false;
                 this.state.lastToken = token;
                 return token;
@@ -353,16 +353,16 @@ class Tokenizer {
             }
             let end = this.index;
             let token = new Token(
-            Str,
-            start,
-            end,
-            this.content.substring(start, end));
+                Str,
+                start,
+                end,
+                this.content.substring(start, end));
             token.isTemplate = true;
             token.quasics = quasics;
             this.state.lastToken = token;
             return token;
         }
-        
+
         if (this.ch == '/') {
             if (
                 this.state.lastToken.tokenKind === Operator ||
@@ -371,10 +371,10 @@ class Tokenizer {
                 this.state.lastToken.isAssignment ||
                 this.state.lastToken.isUpdate
             ) {
-            let isEnd = false;
-            let start = this.index;
-            this.yyChar();
-            while (this.isNotEOF() && !this.isNewLine()) {
+                let isEnd = false;
+                let start = this.index;
+                this.yyChar();
+                while (this.isNotEOF() && !this.isNewLine()) {
                     if (this.ch == "/") {
                         let start = this.index;
                         // check before
@@ -418,7 +418,7 @@ class Tokenizer {
                         Regex,
                         start,
                         end,
-                    substring);
+                        substring);
                     this.state.lastToken = token;
                     return token;
                 } else {
@@ -441,10 +441,10 @@ class Tokenizer {
                     let end = this.index;
                     let substring = this.content.substring(start, end);
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
@@ -455,10 +455,10 @@ class Tokenizer {
                 let end = this.index;
                 let substring = this.content.substring(start, end);
                 let token = new Token(
-                Operator,
-                start,
-                end,
-                substring);
+                    Operator,
+                    start,
+                    end,
+                    substring);
                 token.isAssignment = true;
                 token.isUpdate = false;
                 token.isBinary = false;
@@ -516,10 +516,10 @@ class Tokenizer {
                     let end = this.index;
                     let substring = this.content.substring(start, end);
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
@@ -538,10 +538,10 @@ class Tokenizer {
                         this.yyChar();
                         let end = this.index;
                         let token = new Token(
-                        Operator,
-                        start,
-                        end,
-                        this.content.substring(start, end));
+                            Operator,
+                            start,
+                            end,
+                            this.content.substring(start, end));
                         token.isAssignment = true;
                         token.isUpdate = false;
                         token.isBinary = false;
@@ -552,10 +552,10 @@ class Tokenizer {
                     let end = this.index;
                     let substring = this.content.substring(start, end);
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
@@ -574,10 +574,10 @@ class Tokenizer {
                         this.yyChar();
                         let end = this.index;
                         let token = new Token(
-                        Operator,
-                        start,
-                        end,
-                        this.content.substring(start, end));
+                            Operator,
+                            start,
+                            end,
+                            this.content.substring(start, end));
                         token.isAssignment = true;
                         token.isUpdate = false;
                         token.isBinary = false;
@@ -588,10 +588,10 @@ class Tokenizer {
                     let end = this.index;
                     let substring = this.content.substring(start, end);
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
@@ -610,10 +610,10 @@ class Tokenizer {
                         this.yyChar();
                         let end = this.index;
                         let token = new Token(
-                        Operator,
-                        start,
-                        end,
-                        this.content.substring(start, end));
+                            Operator,
+                            start,
+                            end,
+                            this.content.substring(start, end));
                         token.isAssignment = true;
                         token.isUpdate = false;
                         token.isBinary = false;
@@ -624,10 +624,10 @@ class Tokenizer {
                     let end = this.index;
                     let substring = this.content.substring(start, end);
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
@@ -639,10 +639,10 @@ class Tokenizer {
                     let end = this.index;
                     let substring = this.content.substring(start, end);
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
@@ -662,10 +662,10 @@ class Tokenizer {
                         let end = this.index;
                         let substring = this.content.substring(start, end);
                         let token = new Token(
-                        Operator,
-                        start,
-                        end,
-                        substring);
+                            Operator,
+                            start,
+                            end,
+                            substring);
                         token.isAssignment = true;
                         token.isUpdate = false;
                         token.isBinary = false;
@@ -680,10 +680,10 @@ class Tokenizer {
                             let end = this.index;
                             let substring = this.content.substring(start, end);
                             let token = new Token(
-                            Operator,
-                            start,
-                            end,
-                            substring);
+                                Operator,
+                                start,
+                                end,
+                                substring);
                             token.isAssignment = true;
                             token.isUpdate = false;
                             token.isBinary = false;
@@ -695,10 +695,10 @@ class Tokenizer {
                     let end = this.index;
                     let substring = this.content.substring(start, end);
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
@@ -710,10 +710,10 @@ class Tokenizer {
                     let end = this.index;
                     let substring = this.content.substring(start, end)
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
@@ -725,17 +725,17 @@ class Tokenizer {
                 this.getChar();
             }
             if (
-            ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^' || ch == '%') {
+                ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^' || ch == '%') {
                 this.yyChar();
                 if (this.ch == '=') {
                     this.yyChar();
                     let end = this.index;
                     let substring = this.content.substring(start, end);
                     let token = new Token(
-                    Operator,
-                    start,
-                    end,
-                    substring);
+                        Operator,
+                        start,
+                        end,
+                        substring);
                     token.isAssignment = true;
                     token.isUpdate = false;
                     token.isBinary = false;
@@ -750,10 +750,10 @@ class Tokenizer {
             let end = this.index;
             let substring = this.content.substring(start, end);
             let token = new Token(
-            Operator,
-            start,
-            end,
-            substring);
+                Operator,
+                start,
+                end,
+                substring);
             token.isAssignment = false;
             token.isUpdate = false;
             token.isBinary = true;
@@ -773,10 +773,10 @@ class Tokenizer {
                     }
                     let end = this.index;
                     let token = new Token(
-                    Num,
-                    start,
-                    end,
-                    this.content.substring(start, end));
+                        Num,
+                        start,
+                        end,
+                        this.content.substring(start, end));
                     this.state.lastToken = token;
                     return token;
                 }
@@ -793,10 +793,10 @@ class Tokenizer {
             }
             let end = this.index;
             let token = new Token(
-            Num,
-            start,
-            end,
-            this.content.substring(start, end));
+                Num,
+                start,
+                end,
+                this.content.substring(start, end));
             this.state.lastToken = token;
             return token;
         }
@@ -810,10 +810,10 @@ class Tokenizer {
             let str = this.content.substring(start, end);
             if (isKeyword(str)) {
                 let token = new Token(
-                keywordMap[str],
-                start,
-                end,
-                str);
+                    keywordMap[str],
+                    start,
+                    end,
+                    str);
                 token.realType = Keyword
                 if (str == "instanceof" || str == "in") {
                     token.isAssignment = false;
@@ -824,31 +824,31 @@ class Tokenizer {
                 this.state.lastToken = token;
                 return token;
             }
-            
+
             if (isSpecial(str)) {
                 let token = new Token(
-                Special,
-                start,
-                end,
-                str);
+                    Special,
+                    start,
+                    end,
+                    str);
                 this.state.lastToken = token;
                 return token;
             }
-            
+
             let token = new Token(
-            Id,
-            start,
-            end,
-            str);
+                Id,
+                start,
+                end,
+                str);
             this.state.lastToken = token;
             return token;
         }
 
         // EOF Token
         return new Token(
-        EOF,
-        this.index,
-        this.index,
+            EOF,
+            this.index,
+            this.index,
             '\u0000');
     }
 

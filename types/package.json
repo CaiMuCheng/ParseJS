@@ -1,0 +1,7 @@
+{
+    "name": "@parsejs/types",
+    "version": "1.0.0",
+    "description": "Create AST nodes easily",
+    "main": "./index.js",
+    "type": "module"
+}

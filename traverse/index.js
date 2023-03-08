@@ -1,8 +1,5 @@
-import {
-    visitorKeys
-}
-from "../ast/ast.js";
-import types from "../types/types.js";
+import { visitorKeys } from "../ast/index.js";
+import types from "../types/index.js";
 
 function traverse(node, visitor, parent, parentPath, key, listKey) {
     if (!node || !visitorKeys[node.type]) return;
@@ -153,7 +150,7 @@ class Scope {
     registerBinding(id, path) {
         this.bindings[id] = new Binding(id, path);
     }
-    
+
     getOwnBinding(id) {
         return this.bindings[id];
     }
@@ -174,4 +171,4 @@ class Scope {
 }
 
 export
-default traverse;
+    default traverse;

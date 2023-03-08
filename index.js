@@ -1,23 +1,9 @@
 import fs from "fs";
-import {
-    Tokenizer
-}
-from "./lexer/lexer.js";
-import * as Ast from "./ast/ast.js";
-import traverse from "./traverse/traverse.js";
-import {
-    CodeGenerator
-}
-from "./codegen/codegen.js";
-import {
-    EOF,
-    NewLine
-}
-from "./token/tokenKind.js";
-import {
-    Parser
-}
-from "./parser/parser.js";
+import { Tokenizer } from "./lexer/index.js";
+import { CodeGenerator } from "./codegen/index.js";
+import { EOF, NewLine } from "./token/index.js";
+import { Parser } from "./parser/index.js";
+import Interpreter from "./interpreter/index.js";
 
 function makeIndex(tokens) {
     // for each the token, we needed to transform index to line column.
@@ -46,13 +32,13 @@ function makeIndex(tokens) {
                     column = 0;
                 } else {
                     ++column;
-                }++valueIndex;
+                } ++valueIndex;
             }
             token.startLine = startLine;
             token.startColumn = startColumn;
             token.endLine = line;
             token.endColumn = column;
-        }++index;
+        } ++index;
     }
 }
 
@@ -73,10 +59,10 @@ function tokenizeAll(str) {
 }
 
 function codegen(
-ast,
-format = false,
-computedMode = "default",
-bracketForExpressionStatement = false) {
+    ast,
+    format = false,
+    computedMode = "default",
+    bracketForExpressionStatement = false) {
     const codeGenerator = new CodeGenerator(ast);
     codeGenerator.setFormat(format);
     codeGenerator.setComputedMode(computedMode);

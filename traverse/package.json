@@ -1,0 +1,7 @@
+{
+    "name": "@parsejs/traverse",
+    "version": "1.0.0",
+    "description": "Traverse AST trees",
+    "main": "./index.js",
+    "type": "module"
+}

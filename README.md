@@ -15,6 +15,8 @@ You can modify the source after run code.
 - [x] Sequence expression
 - [x] Array expression & Object expression
 - [x] Function expression
+- [x] Code generator & Traverse
+- [] Code interpeter
 
 ## Get started
 ```bash

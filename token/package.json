@@ -1,0 +1,7 @@
+{
+    "name": "@parsejs/token",
+    "version": "1.0.0",
+    "description": "Token utils",
+    "main": "./index.js",
+    "type": "module"
+}

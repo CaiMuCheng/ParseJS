@@ -1,4 +1,4 @@
-import traverse from "../traverse/traverse.js";
+import traverse from "../traverse/index.js";
 
 class CodeGenerator {
     constructor(ast) {
@@ -335,7 +335,7 @@ class CodeGenerator {
                     if (node.prefix) {
                         this.emit(node.operator);
                         if (
-                        node.operator == "void" || node.operator == "typeof" || node.operator == "delete") {
+                            node.operator == "void" || node.operator == "typeof" || node.operator == "delete") {
                             this.space();
                         }
                         path.traverse("argument");
@@ -515,7 +515,7 @@ class CodeGenerator {
                 result += sliceCode;
                 if (sliceCode == ";" && index < this.data.length - 1) {
                     result += "\n";
-                }++index;
+                } ++index;
             }
             return result;
         }
