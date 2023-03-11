@@ -14,12 +14,18 @@ class Interpreter {
     createScopes() {
         traverse(this.ast, {
             enter: (path) => {
-                const { node } = path;
-                const { type } = node;
+                const {
+                    node
+                } = path;
+                const {
+                    type
+                } = node;
                 if (type == "Program") {
                     this.scopeUUID = 0;
                     this.scope = this.createScope()
-                    this.scope.toString = () => { return "TopLevelScope"; }
+                    this.scope.toString = () => {
+                        return "TopLevelScope";
+                    }
                 }
                 if (type == "FunctionExpression" || type == "FunctionDeclaration") {
                     ++this.scopeUUID;
@@ -35,8 +41,12 @@ class Interpreter {
                 }
             },
             exit: (path) => {
-                const { node } = path;
-                const { type } = node;
+                const {
+                    node
+                } = path;
+                const {
+                    type
+                } = node;
                 if (type == "FunctionExpression" || type == "FunctionDeclaration") {
                     this.scope = this.scope.parent;
                 }
@@ -51,11 +61,31 @@ class Interpreter {
         scope.uuid = this.scopeUUID;
         scope.children = [];
         scope.parent = this.scope;
-        scope.toString = () => { return "BlockScope"; }
+        scope.toString = () => {
+            return "BlockScope";
+        }
         scope.declarations.undefined = true
         scope.declarations.NaN = true
         scope.map.undefined = undefined;
         scope.map.NaN = NaN;
+        scope.value = function(key) {
+            if (this.declarations[key]) {
+                return this.map[key];
+            }
+            if (this.parent != null) {
+                return this.parent.value(key);
+            }
+            throw new ReferenceError(key + " is not defined");
+        }
+        scope.hasDeclaration = function(key) {
+            if (this.declarations[key]) {
+                return true;
+            }
+            if (this.parent != null) {
+                return this.parent.hasDeclaration(key);
+            }
+            return false;
+        }
         return scope;
     }
 
@@ -64,20 +94,18 @@ class Interpreter {
 
         traverse(this.ast, {
             enter: (path) => {
-                const { node } = path;
-                const { type } = node;
+                const {
+                    node
+                } = path;
+                const {
+                    type
+                } = node;
                 if (type == "VariableDeclarator") {
-                    this.set(node.id.name, this.require(node.init));
                     path.skip();
+                    this.result = undefined;
+                    path.traverse("init");
+                    this.set(node.id.name, this.result);
                     return;
-                }
-                if (type == "Identifier") {
-                    if (path.parent.type != "MemberExpression") {
-                        if (!this.isDeclaration(node.name)) {
-                            throw new ReferenceError(node.name + " is not defined");
-                        }
-                        this.result = this.value(node.name);
-                    }
                 }
                 if (type == "FunctionExpression" || type == "FunctionDeclaration") {
                     if (this.scopeIndex === undefined) {
@@ -86,10 +114,53 @@ class Interpreter {
                     this.scope = this.scope.children[this.scopeIndex];
                     ++this.scopeIndex;
                 }
+
+                switch (type) {
+                    case "Identifier":
+                        this.result = this.scope.value(node.name);
+                        break;
+                    case "Literal":
+                        if (node.isRegex) {
+                            return RegExp(node.value);
+                        }
+                        this.result = node.value;
+                        break;
+                    case "ObjectExpression":
+                        path.skip();
+                        this.result = {};
+                        path.traverse("properties");
+                        break;
+                    case "Property":
+                        path.skip();
+                        const attach = this.result;
+                        path.traverse("value");
+                        attach[node.key.name] = this.result;
+                        this.result = attach;
+                        break;
+                    case "BinaryExpression":
+                        path.skip();
+                        this.calculateBinaryExpression(path);
+                        break;
+                    case "UpdateExpression":
+                        path.skip();
+                        const operator = node.operator;
+                        const id = node.argument;
+                        path.traverse("argument");
+                        if (node.prefix) {
+                            this.scope.map[id.name] = ++this.result;
+                        } else {
+                            this.scope.map[id.name] = this.result + 1;
+                        }
+                        break;
+                }
             },
             exit: (path) => {
-                const { node } = path;
-                const { type } = node;
+                const {
+                    node
+                } = path;
+                const {
+                    type
+                } = node;
                 if (type == "FunctionExpression" || type == "FunctionDeclaration") {
                     this.scope = this.scope.parent;
                 }
@@ -98,22 +169,94 @@ class Interpreter {
         return this.result;
     }
 
-    require(node) {
-        if (node == null) {
-            return;
+    calculateBinaryExpression(path) {
+        const node = path.node;
+        let left = null;
+        let op = null;
+        let right = null;
+        if (node.left.type != "Literal") {
+            path.traverse("left");
+            left = this.result;
         } else {
-            return this.exec(node);
+            left = node.left.value;
         }
-    }
-
-    exec(node) {
-        const { type } = node;
-        switch (type) {
-            case "Literal":
-                if (node.isRegex) {
-                    return RegExp(node.value);
-                }
-                return node.value;
+        op = node.operator;
+        if (node.right.type != "Literal") {
+            path.traverse("right");
+            right = this.result;
+        } else {
+            right = node.right.value;
+        }
+        switch (op) {
+            case "+":
+                this.result = left + right;
+                break;
+            case "-":
+                this.result = left - right;
+                break;
+            case "*":
+                this.result = left * right;
+                break;
+            case "/":
+                this.result = left / right;
+                break;
+            case "%":
+                this.result = left % right;
+                break;
+            case "<<":
+                this.result = left << right;
+                break;
+            case ">>":
+                this.result = left >> right;
+                break;
+            case ">>>":
+                this.result = left >>> right;
+                break;
+            case "<":
+                this.result = left < right;
+                break;
+            case ">":
+                this.result = left > right;
+                break;
+            case "<=":
+                this.result = left <= right;
+                break;
+            case ">=":
+                this.result = left >= right;
+                break;
+            case "instanceof":
+                this.result = left instanceof right;
+                break;
+            case "in":
+                this.result = left in right;
+                break;
+            case "==":
+                this.result = left == right;
+                break;
+            case "!=":
+                this.result = left != right;
+                break;
+            case "===":
+                this.result = left === right;
+                break;
+            case "!==":
+                this.result = left !== right;
+                break;
+            case "&":
+                this.result = left & right;
+                break;
+            case "^":
+                this.result = left ^ right;
+                break;
+            case "|":
+                this.result = left | right;
+                break;
+            case "&&":
+                this.result = left && right;
+                break;
+            case "||":
+                this.result = left || right;
+                break;
         }
     }
 
@@ -129,13 +272,6 @@ class Interpreter {
         this.scope.map[key] = value;
     }
 
-    value(key) {
-        return this.scope.map[key];
-    }
-
-    isDeclaration(key) {
-        return !!this.scope.declarations[key];
-    }
 }
 
 export {
