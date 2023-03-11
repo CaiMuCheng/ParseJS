@@ -80,18 +80,8 @@ function interprete(
     ast,
     topLevelScope = global
 ) {
-    const interpreter = new Interpreter(ast);
-    interprete.topLevelScope = topLevelScope;
-    return interpreter.interprete();
-}
-
-function internalScope() {
-    const object = {
-        toString() {
-            return "[object InternalScope]";
-        }
-    };
-    return object;
+    const interpreter = new Interpreter(ast, topLevelScope);
+    return interpreter.run();
 }
 
 const source = fs.readFileSync("./input.js")
@@ -106,5 +96,5 @@ fs.writeFileSync("./ast.json", JSON.stringify(ast, null, 2));
 const code = codegen(ast, true);
 fs.writeFileSync("./output.js", code);
 
-const result = interprete(ast, internalScope());
+const result = interprete(ast);
 console.log(result);

@@ -1,30 +1,58 @@
 {
   "type": "Program",
   "start": 0,
-  "end": 21,
+  "end": 29,
   "body": [
     {
       "type": "VariableDeclaration",
       "start": 0,
-      "end": 10,
+      "end": 19,
       "declarations": [
         {
           "type": "VariableDeclarator",
           "start": 4,
-          "end": 9,
+          "end": 18,
           "id": {
             "type": "Identifier",
             "start": 4,
             "end": 5,
-            "name": "a"
+            "name": "x"
           },
           "init": {
-            "type": "Literal",
+            "type": "BinaryExpression",
             "start": 8,
-            "end": 9,
-            "value": 1,
-            "raw": "1",
-            "rawValue": "1"
+            "end": 18,
+            "left": {
+              "type": "Literal",
+              "start": 8,
+              "end": 10,
+              "value": 10,
+              "raw": "10",
+              "rawValue": "10"
+            },
+            "operator": "+",
+            "right": {
+              "type": "BinaryExpression",
+              "start": 13,
+              "end": 18,
+              "left": {
+                "type": "Literal",
+                "start": 13,
+                "end": 14,
+                "value": 5,
+                "raw": "5",
+                "rawValue": "5"
+              },
+              "operator": "/",
+              "right": {
+                "type": "Literal",
+                "start": 17,
+                "end": 18,
+                "value": 2,
+                "raw": "2",
+                "rawValue": "2"
+              }
+            }
           }
         }
       ],
@@ -32,37 +60,35 @@
     },
     {
       "type": "ExpressionStatement",
-      "start": 12,
-      "end": 21,
+      "start": 20,
+      "end": 29,
       "expression": {
-        "type": "BinaryExpression",
-        "start": 12,
-        "end": 21,
+        "type": "AssignmentExpression",
+        "start": 20,
+        "end": 29,
+        "operator": "=",
         "left": {
-          "type": "UpdateExpression",
-          "start": 12,
-          "end": 15,
-          "operator": "++",
-          "prefix": true,
-          "argument": {
-            "type": "Identifier",
-            "start": 14,
-            "end": 15,
-            "name": "a"
-          }
-        },
-        "operator": "+",
-        "right": {
-          "type": "UpdateExpression",
-          "start": 18,
+          "type": "Identifier",
+          "start": 20,
           "end": 21,
-          "operator": "++",
-          "prefix": false,
-          "argument": {
+          "name": "x"
+        },
+        "right": {
+          "type": "BinaryExpression",
+          "start": 24,
+          "end": 29,
+          "left": {
             "type": "Identifier",
-            "start": 18,
-            "end": 19,
-            "name": "a"
+            "start": 24,
+            "end": 25,
+            "name": "x"
+          },
+          "operator": "*",
+          "right": {
+            "type": "Identifier",
+            "start": 28,
+            "end": 29,
+            "name": "x"
           }
         }
       }

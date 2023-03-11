@@ -1,277 +1,326 @@
-import types from "../types/index.js";
 import traverse from "../traverse/index.js";
 
 class Interpreter {
-    constructor(ast) {
-        this.ast = ast;
-        this.topLevelScope = {
-            toString() {
-                return "[object InternalScope]";
-            }
-        };
-    }
 
-    createScopes() {
-        traverse(this.ast, {
-            enter: (path) => {
-                const {
-                    node
-                } = path;
-                const {
-                    type
-                } = node;
-                if (type == "Program") {
-                    this.scopeUUID = 0;
-                    this.scope = this.createScope()
-                    this.scope.toString = () => {
-                        return "TopLevelScope";
-                    }
-                }
-                if (type == "FunctionExpression" || type == "FunctionDeclaration") {
-                    ++this.scopeUUID;
-                    const scope = this.createScope();
-                    this.scope.children.push(scope);
-                    this.scope = scope;
-                }
-                if (type == "VariableDeclarator") {
-                    this.variables(node);
-                }
-                if (type == "FunctionDeclaration") {
-                    this.functions(node);
-                }
-            },
-            exit: (path) => {
-                const {
-                    node
-                } = path;
-                const {
-                    type
-                } = node;
-                if (type == "FunctionExpression" || type == "FunctionDeclaration") {
-                    this.scope = this.scope.parent;
-                }
-            }
+    constructor(ast, topLevelScope) {
+        this.ast = ast;
+        this.scope = null;
+
+        this.topLevelScope(topLevelScope ? topLevelScope : {
+            toString() { return "T" }
         });
     }
 
-    createScope() {
-        const scope = Object.create(null);
-        scope.map = Object.create(null);
-        scope.declarations = Object.create(null);
-        scope.uuid = this.scopeUUID;
-        scope.children = [];
-        scope.parent = this.scope;
-        scope.toString = () => {
-            return "BlockScope";
-        }
-        scope.declarations.undefined = true
-        scope.declarations.NaN = true
-        scope.map.undefined = undefined;
-        scope.map.NaN = NaN;
-        scope.value = function(key) {
-            if (this.declarations[key]) {
-                return this.map[key];
-            }
-            if (this.parent != null) {
-                return this.parent.value(key);
-            }
-            throw new ReferenceError(key + " is not defined");
-        }
-        scope.hasDeclaration = function(key) {
-            if (this.declarations[key]) {
-                return true;
-            }
-            if (this.parent != null) {
-                return this.parent.hasDeclaration(key);
-            }
-            return false;
-        }
-        return scope;
-    }
+    run() {
+        // Pre-tnterprete for recording variables and functions
+        traverse(this.ast, {
+            enter: (path) => {
+                const node = path.node;
+                const type = node.type;
 
-    interprete() {
-        this.createScopes();
+                switch (type) {
+                    case "BlockStatement":
+                        if (path.parent.type == "FunctionDeclaration" ||
+                            path.parent.type == "FunctionExpression") {
+                            this.functionScope();
+                        } else {
+                            this.blockScope();
+                        }
+                        break;
+                    case "VariableDeclarator":
+                        let kind = path.parent.kind;
+                        let variableName = node.id.name;
+                        this.scope.define(variableName, {
+                            type: "variable",
+                            kind: kind
+                        });
+                        break;
+                    case "FunctionDeclaration":
+                        let functionName = node.id.name;
+                        this.scope.define(functionName, {
+                            type: "function"
+                        });
+                        break;
+                }
+            },
+            exit: (path) => {
+                const node = path.node;
+                const type = node.type;
+
+                switch (type) {
+                    case "BlockStatement":
+                        this.scope = this.scope.parent;
+                        break;
+                }
+            }
+        });
 
         traverse(this.ast, {
             enter: (path) => {
-                const {
-                    node
-                } = path;
-                const {
-                    type
-                } = node;
-                if (type == "VariableDeclarator") {
-                    path.skip();
-                    this.result = undefined;
-                    path.traverse("init");
-                    this.set(node.id.name, this.result);
-                    return;
-                }
-                if (type == "FunctionExpression" || type == "FunctionDeclaration") {
-                    if (this.scopeIndex === undefined) {
-                        this.scopeIndex = 0;
+                const node = path.node;
+                const type = node.type;
+
+                if (type == "BlockStatement") {
+                    if (this.scope.childIndex === undefined) {
+                        this.scope.childIndex = 0
+                    } else {
+                        ++this.scope.childIndex;
                     }
-                    this.scope = this.scope.children[this.scopeIndex];
-                    ++this.scopeIndex;
+                    this.scope = this.scope.children[this.scope.childIndex];
+                    if (this.scope.childIndex == this.scope.children.length - 1) {
+                        delete this.scope.childIndex;
+                    }
                 }
 
                 switch (type) {
                     case "Identifier":
-                        this.result = this.scope.value(node.name);
+                        this.res = this.identifier(node.name);
                         break;
                     case "Literal":
-                        if (node.isRegex) {
-                            return RegExp(node.value);
-                        }
-                        this.result = node.value;
+                        this.res = this.literal(node);
                         break;
-                    case "ObjectExpression":
-                        path.skip();
-                        this.result = {};
-                        path.traverse("properties");
+                    case "VariableDeclarator":
+                        this.res = this.variableDeclarator(path, node);
                         break;
-                    case "Property":
-                        path.skip();
-                        const attach = this.result;
-                        path.traverse("value");
-                        attach[node.key.name] = this.result;
-                        this.result = attach;
+                    case "AssignmentExpression":
+                        this.res = this.assignmentExpression(path, node);
                         break;
                     case "BinaryExpression":
-                        path.skip();
-                        this.calculateBinaryExpression(path);
-                        break;
-                    case "UpdateExpression":
-                        path.skip();
-                        const operator = node.operator;
-                        const id = node.argument;
-                        path.traverse("argument");
-                        if (node.prefix) {
-                            this.scope.map[id.name] = ++this.result;
-                        } else {
-                            this.scope.map[id.name] = this.result + 1;
-                        }
+                        this.res = this.binaryExpression(path, node);
                         break;
                 }
             },
             exit: (path) => {
-                const {
-                    node
-                } = path;
-                const {
-                    type
-                } = node;
-                if (type == "FunctionExpression" || type == "FunctionDeclaration") {
-                    this.scope = this.scope.parent;
+                const node = path.node;
+                const type = node.type;
+
+                switch (type) {
+                    case "BlockStatement":
+                        this.scope = this.scope.parent;
+                        break;
                 }
             }
         });
-        return this.result;
+        return this.res;
     }
 
-    calculateBinaryExpression(path) {
-        const node = path.node;
-        let left = null;
-        let op = null;
-        let right = null;
-        if (node.left.type != "Literal") {
-            path.traverse("left");
-            left = this.result;
-        } else {
-            left = node.left.value;
+    identifier(key) {
+        return this.scope.getDeclaration(key);
+    }
+
+    literal(node) {
+        return node.isRegex ? new RegExp(node.value) : node.value;
+    }
+
+    variableDeclarator(path, node) {
+        path.skip();
+
+        const key = node.id.name;
+        let res = undefined;
+        if (node.init) {
+            res = this.traverseEx(path, "init");
         }
-        op = node.operator;
-        if (node.right.type != "Literal") {
-            path.traverse("right");
-            right = this.result;
-        } else {
-            right = node.right.value;
+
+        this.scope.set(key, res);
+    }
+
+    assignmentExpression(path, node) {
+        path.skip();
+
+        const operator = node.operator;
+        const key = node.left.name;
+        const topLevelScope = this.scope.getTopLevel();
+        const declarationObj = topLevelScope.obj;
+        const right = this.traverseEx(path, "right");
+
+        switch (operator) {
+            case "=":
+                return declarationObj[key] = right;
+            case "+=":
+                return declarationObj[key] += right;
+            case "-=":
+                return declarationObj[key] -= right;
+            case "*=":
+                return declarationObj[key] *= right;
+            case "/=":
+                return declarationObj[key] /= right;
+            case "%=":
+                return declarationObj[key] %= right;
+            case "^=":
+                return declarationObj[key] ^= right;
+            case "|=":
+                return declarationObj[key] |= right;
+            case "||=":
+                return declarationObj[key] ||= right;
+            case "&=":
+                return declarationObj[key] &= right;
+            case "&&=":
+                return declarationObj[key] &&= right;
+            case ">>=":
+                return declarationObj[key] >>= right;
+            case ">>>=":
+                return declarationObj[key] >>>= right;
+            case "<<=":
+                return declarationObj[key] <<= right;
         }
-        switch (op) {
+    }
+
+    binaryExpression(path, node) {
+        path.skip();
+        const left = this.traverseEx(path, "left");
+        const operator = node.operator;
+        const right = this.traverseEx(path, "right");
+
+        switch (operator) {
             case "+":
-                this.result = left + right;
-                break;
+                return left + right;
             case "-":
-                this.result = left - right;
-                break;
+                return left - right;
             case "*":
-                this.result = left * right;
-                break;
+                return left * right;
             case "/":
-                this.result = left / right;
-                break;
+                return left / right;
             case "%":
-                this.result = left % right;
-                break;
+                return left % right;
             case "<<":
-                this.result = left << right;
-                break;
+                return left << right;
             case ">>":
-                this.result = left >> right;
-                break;
+                return left >> right;
             case ">>>":
-                this.result = left >>> right;
-                break;
+                return left >>> right;
             case "<":
-                this.result = left < right;
-                break;
+                return left < right;
             case ">":
-                this.result = left > right;
-                break;
+                return left > right;
             case "<=":
-                this.result = left <= right;
-                break;
+                return left <= right;
             case ">=":
-                this.result = left >= right;
-                break;
+                return left >= right;
             case "instanceof":
-                this.result = left instanceof right;
-                break;
+                return left instanceof right;
             case "in":
-                this.result = left in right;
-                break;
+                return left in right;
             case "==":
-                this.result = left == right;
-                break;
+                return left == right;
             case "!=":
-                this.result = left != right;
-                break;
+                return left != right;
             case "===":
-                this.result = left === right;
-                break;
+                return left === right;
             case "!==":
-                this.result = left !== right;
-                break;
+                return left !== right;
             case "&":
-                this.result = left & right;
-                break;
+                return left & right;
             case "^":
-                this.result = left ^ right;
-                break;
+                return left ^ right;
             case "|":
-                this.result = left | right;
-                break;
+                return left | right;
             case "&&":
-                this.result = left && right;
-                break;
+                return left && right;
             case "||":
-                this.result = left || right;
-                break;
+                return left || right;
         }
     }
 
-    variables(node) {
-        this.scope.declarations[node.id.name] = true;
+    traverseEx(path, key) {
+        path.traverse(key);
+        return this.res;
     }
 
-    functions(node) {
-        this.scope.declarations[node.id.name] = true;
+    /* Below about scopes */
+    topLevelScope(topLevelScope) {
+        this.scope = new Scope("TopLevelScope", topLevelScope);
+    }
+
+    functionScope() {
+        let scope = new Scope("FunctionScope", {}, this.scope);
+        this.scope.addScope(scope);
+        this.scope = scope;
+    }
+
+    blockScope() {
+        let scope = new Scope("BlockScope", {}, this.scope);
+        this.scope.addScope(scope);
+        this.scope = scope;
+    }
+
+}
+
+class Scope {
+    constructor(type, obj, parent) {
+        this.type = type;
+        this.vars = Object.create(null);
+        this.obj = obj;
+        this.children = [];
+        this.parent = parent;
+    }
+
+    addScope(scope) {
+        this.children.push(scope);
+    }
+
+    define(key, container) {
+        this.vars[key] = container;
     }
 
     set(key, value) {
-        this.scope.map[key] = value;
+        if (this.has(key)) {
+            this.obj[key] = value;
+        } else if (this.parent != null) {
+            this.parent.set(key, value);
+        }
     }
 
+    getDeclaration(key) {
+        if (this.has(key)) {
+            return this.obj[key];
+        }
+
+        if (this.parent != null) {
+            return this.parent.getDeclaration(key);
+        }
+
+        throw new ReferenceError(key + " is not defined");
+    }
+
+    getDeclarationObj() {
+        if (this.has(key)) {
+            return this.obj;
+        }
+
+        if (this.parent != null) {
+            return this.parent.getDeclarationObj(key);
+        }
+
+        throw new ReferenceError(key + " is not defined");
+    }
+
+    has(key) {
+        if (this.vars[key]) {
+            return true;
+        }
+
+        return this.obj[key] !== undefined;
+    }
+
+    hasDeclaration(key) {
+        if (this.has(key)) {
+            return true;
+        }
+
+        if (this.parent != null) {
+            return this.parent.hasDeclaration(key);
+        }
+
+        return false;
+    }
+
+    getTopLevel() {
+        return this.parent ? this.parent.getTopLevel() : this;
+    }
+
+    toString() {
+        return "[object " + this.type + "]";
+    }
 }
 
 export {

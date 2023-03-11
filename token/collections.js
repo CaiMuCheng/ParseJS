@@ -99,8 +99,6 @@ const priorities = {
 const specials = [
     "false",
     "true",
-    "NaN",
-    "undefined",
     "null"
 ];
 

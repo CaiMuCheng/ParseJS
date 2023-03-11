@@ -563,6 +563,21 @@ class Tokenizer {
                     this.state.lastToken = token;
                     return token;
                 }
+                if (this.ch == '=') {
+                    this.yyChar();
+                    let end = this.index;
+                    let token = new Token(
+                        Operator,
+                        start,
+                        end,
+                        this.content.substring(start, end));
+                    token.isAssignment = true;
+                    token.isUpdate = false;
+                    token.isBinary = false;
+                    token.level = priorities[substring];
+                    this.state.lastToken = token;
+                    return token;
+                }
                 this.index = start;
                 this.getChar();
             }
@@ -595,6 +610,21 @@ class Tokenizer {
                     token.isAssignment = false;
                     token.isUpdate = false;
                     token.isBinary = true;
+                    token.level = priorities[substring];
+                    this.state.lastToken = token;
+                    return token;
+                }
+                if (this.ch == '=') {
+                    this.yyChar();
+                    let end = this.index;
+                    let token = new Token(
+                        Operator,
+                        start,
+                        end,
+                        this.content.substring(start, end));
+                    token.isAssignment = true;
+                    token.isUpdate = false;
+                    token.isBinary = false;
                     token.level = priorities[substring];
                     this.state.lastToken = token;
                     return token;
