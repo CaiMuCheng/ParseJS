@@ -1,5 +1,5 @@
 {
-    "name": "@parsejs/interpreter",
+    "name": "@nicejs/interpreter",
     "version": "1.0.0",
     "description": "Interprete AST tree and get result",
     "main": "./index.js",

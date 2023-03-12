@@ -1,5 +1,5 @@
 {
-    "name": "@parsejs/token",
+    "name": "@nicejs/token",
     "version": "1.0.0",
     "description": "Token utils",
     "main": "./index.js",

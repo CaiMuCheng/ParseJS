@@ -1,5 +1,5 @@
 {
-    "name": "@parsejs/parser",
+    "name": "@nicejs/parser",
     "version": "1.0.0",
     "description": "Build AST tree by tokens",
     "main": "./index.js",

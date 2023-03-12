@@ -1,6 +1,6 @@
-<h1 align="center">ParseJS</h1>
-The ECMAScript (aka JavaScript) <strong>lexical analysis</strong> and <strong>syntax analysis</strong> implemention that named NiceJS. <br/>
-Corresponds to <strong>ECMAScript 6</strong> <br/>
+<h1 align="center">NiceJS</h1>
+The ECMAScript (aka JavaScript) <strong>lexical analysis</strong> and <strong>syntax analysis</strong> and <strong>interpreter</strong> implemention
+Corresponds to <strong>ECMAScript 5</strong> <br/>
 The AST standard is <strong>acorn.js</strong>
 
 ## What's this?
@@ -16,11 +16,11 @@ You can modify the source after run code.
 - [x] Array expression & Object expression
 - [x] Function expression
 - [x] Code generator & Traverse
-- [ ] Code interpeter
+- [x] Code interpeter (many features in progressing)
 
 ## Get started
 ```bash
-git clone https://github.com/CaiMuCheng/ParseJS.git
-cd ParseJS
+git clone https://github.com/CaiMuCheng/NiceJS.git
+cd NiceJS
 npm run start
 ```

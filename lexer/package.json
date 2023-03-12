@@ -1,5 +1,5 @@
 {
-    "name": "@parsejs/lexer",
+    "name": "@nicejs/lexer",
     "version": "1.0.0",
     "description": "Tokenize sources",
     "main": "./index.js",

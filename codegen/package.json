@@ -1,5 +1,5 @@
 {
-    "name": "@parsejs/codegen",
+    "name": "@nicejs/codegen",
     "version": "1.0.0",
     "description": "Generate code by AST nodes",
     "main": "./index.js",
